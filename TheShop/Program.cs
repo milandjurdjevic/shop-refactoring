@@ -22,7 +22,7 @@ namespace TheShop
 			{
 				//print article on console
 				var article = shopService.GetById(1);
-				Console.WriteLine("Found article with ID: " + article.ID);
+				Console.WriteLine("Found article with ID: " + article.Id);
 			}
 			catch (Exception ex)
 			{
@@ -33,7 +33,7 @@ namespace TheShop
 			{
 				//print article on console				
 				var article = shopService.GetById(12);
-				Console.WriteLine("Found article with ID: " + article.ID);
+				Console.WriteLine("Found article with ID: " + article.Id);
 			}
 			catch (Exception ex)
 			{

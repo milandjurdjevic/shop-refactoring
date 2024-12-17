@@ -6,20 +6,19 @@ namespace TheShop
 {
 	public class ShopService
 	{
-		private DatabaseDriver DatabaseDriver;
-		private Logger logger;
-
-		private Supplier1 Supplier1;
-		private Supplier2 Supplier2;
-		private Supplier3 Supplier3;
+		private DatabaseDriver _databaseDriver;
+		private Logger _logger;
+		private Supplier1 _supplier1;
+		private Supplier2 _supplier2;
+		private Supplier3 _supplier3;
 		
 		public ShopService()
 		{
-			DatabaseDriver = new DatabaseDriver();
-			logger = new Logger();
-			Supplier1 = new Supplier1();
-			Supplier2 = new Supplier2();
-			Supplier3 = new Supplier3();
+			_databaseDriver = new DatabaseDriver();
+			_logger = new Logger();
+			_supplier1 = new Supplier1();
+			_supplier2 = new Supplier2();
+			_supplier3 = new Supplier3();
 		}
 
 		public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
@@ -28,23 +27,23 @@ namespace TheShop
 
 			Article article = null;
 			Article tempArticle = null;
-			var articleExists = Supplier1.ArticleInInventory(id);
+			var articleExists = _supplier1.ArticleInInventory(id);
 			if (articleExists)
 			{
-				tempArticle = Supplier1.GetArticle(id);
-				if (maxExpectedPrice < tempArticle.ArticlePrice)
+				tempArticle = _supplier1.GetArticle(id);
+				if (maxExpectedPrice < tempArticle.Price)
 				{
-					articleExists = Supplier2.ArticleInInventory(id);
+					articleExists = _supplier2.ArticleInInventory(id);
 					if (articleExists)
 					{
-						tempArticle = Supplier2.GetArticle(id);
-						if (maxExpectedPrice < tempArticle.ArticlePrice)
+						tempArticle = _supplier2.GetArticle(id);
+						if (maxExpectedPrice < tempArticle.Price)
 						{
-							articleExists = Supplier3.ArticleInInventory(id);
+							articleExists = _supplier3.ArticleInInventory(id);
 							if (articleExists)
 							{
-								tempArticle = Supplier3.GetArticle(id);
-								if (maxExpectedPrice < tempArticle.ArticlePrice)
+								tempArticle = _supplier3.GetArticle(id);
+								if (maxExpectedPrice < tempArticle.Price)
 								{
 									article = tempArticle;
 								}
@@ -64,20 +63,20 @@ namespace TheShop
 				throw new Exception("Could not order article");
 			}
 
-			logger.Debug("Trying to sell article with id=" + id);
+			_logger.Debug("Trying to sell article with id=" + id);
 
 			article.IsSold = true;
-			article.SoldDate = DateTime.Now;
-			article.BuyerUserId = buyerId;
+			article.SoldOn = DateTime.Now;
+			article.SoldTo = buyerId;
 			
 			try
 			{
-				DatabaseDriver.Save(article);
-				logger.Info("Article with id=" + id + " is sold.");
+				_databaseDriver.Save(article);
+				_logger.Info("Article with id=" + id + " is sold.");
 			}
 			catch (ArgumentNullException ex)
 			{
-				logger.Error("Could not save article with id=" + id);
+				_logger.Error("Could not save article with id=" + id);
 				throw new Exception("Could not save article with id");
 			}
 			catch (Exception)
@@ -89,7 +88,7 @@ namespace TheShop
 
 		public Article GetById(int id)
 		{
-			return DatabaseDriver.GetById(id);
+			return _databaseDriver.GetById(id);
 		}
 	}
 
@@ -100,7 +99,7 @@ namespace TheShop
 
 		public Article GetById(int id)
 		{
-            return _articles.Single(x => x.ID == id);
+            return _articles.Single(x => x.Id == id);
 		}
 
 		public void Save(Article article)
@@ -138,9 +137,9 @@ namespace TheShop
 		{
 			return new Article()
 			{
-				ID = 1,
-				Name_of_article = "Article from supplier1",
-				ArticlePrice = 458
+				Id = 1,
+				Name = "Article from supplier1",
+				Price = 458
 			};
 		}
 	}
@@ -156,9 +155,9 @@ namespace TheShop
 		{
 			return new Article()
 			{
-				ID = 1,
-				Name_of_article = "Article from supplier2",
-				ArticlePrice = 459
+				Id = 1,
+				Name = "Article from supplier2",
+				Price = 459
 			};
 		}
 	}
@@ -174,24 +173,21 @@ namespace TheShop
 		{
 			return new Article()
 			{
-				ID = 1,
-				Name_of_article = "Article from supplier3",
-				ArticlePrice = 460
+				Id = 1,
+				Name = "Article from supplier3",
+				Price = 460
 			};
 		}
 	}
 
 	public class Article
 	{
-		public int ID { get; set; }
-
-		public string Name_of_article { get; set; }
-
-		public int ArticlePrice { get; set; }
+		public int Id { get; set; }
+		public string Name { get; set; } = String.Empty;
+		public int Price { get; set; }
 		public bool IsSold { get; set; }
-
-		public DateTime SoldDate { get; set; }
-		public int BuyerUserId { get; set; }
+		public DateTime? SoldOn { get; set; }
+		public int? SoldTo { get; set; }
 	}
 
 }
