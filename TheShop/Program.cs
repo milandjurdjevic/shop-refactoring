@@ -6,7 +6,7 @@ namespace TheShop
 	{
 		private static void Main(string[] args)
 		{
-			var shopService = new ShopService();
+			var shopService = new ShopService(new InMemoryRepository(), new ConsoleLogger(), new Supplier1(), new Supplier2(), new Supplier3());
 
 			try
 			{

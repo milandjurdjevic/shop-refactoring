@@ -6,19 +6,19 @@ namespace TheShop
 {
 	public class ShopService
 	{
-		private DatabaseDriver _databaseDriver;
-		private Logger _logger;
-		private Supplier1 _supplier1;
-		private Supplier2 _supplier2;
-		private Supplier3 _supplier3;
+		private IRepository _repository;
+		private ILogger _logger;
+		private ISupplier _supplier1;
+		private ISupplier _supplier2;
+		private ISupplier _supplier3;
 		
-		public ShopService()
+		public ShopService(IRepository repository, ILogger logger, ISupplier supplier1, ISupplier supplier2, ISupplier supplier3)
 		{
-			_databaseDriver = new DatabaseDriver();
-			_logger = new Logger();
-			_supplier1 = new Supplier1();
-			_supplier2 = new Supplier2();
-			_supplier3 = new Supplier3();
+			_repository = repository;
+			_logger = logger;
+			_supplier1 = supplier1;
+			_supplier2 = supplier2;
+			_supplier3 = supplier3;
 		}
 
 		public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
@@ -67,11 +67,11 @@ namespace TheShop
 
 			article.IsSold = true;
 			article.SoldOn = DateTime.Now;
-			article.SoldTo = buyerId;
+			article.BuyerId = buyerId;
 			
 			try
 			{
-				_databaseDriver.Save(article);
+				_repository.Save(article);
 				_logger.Info("Article with id=" + id + " is sold.");
 			}
 			catch (ArgumentNullException ex)
@@ -88,12 +88,18 @@ namespace TheShop
 
 		public Article GetById(int id)
 		{
-			return _databaseDriver.GetById(id);
+			return _repository.GetById(id);
 		}
 	}
 
 	//in memory implementation
-	public class DatabaseDriver
+	public interface IRepository
+	{
+		Article GetById(int id);
+		void Save(Article article);
+	}
+
+	public class InMemoryRepository : IRepository
 	{
 		private List<Article> _articles = new List<Article>();
 
@@ -108,7 +114,14 @@ namespace TheShop
 		}
 	}
 
-	public class Logger
+	public interface ILogger
+	{
+		void Info(string message);
+		void Error(string message);
+		void Debug(string message);
+	}
+
+	public class ConsoleLogger : ILogger
 	{
 		public void Info(string message)
 		{
@@ -126,7 +139,13 @@ namespace TheShop
 		}
 	}
 
-	public class Supplier1
+	public interface ISupplier
+	{
+		bool ArticleInInventory(int id);
+		Article GetArticle(int id);
+	}
+
+	public class Supplier1 : ISupplier
 	{
 		public bool ArticleInInventory(int id)
 		{
@@ -144,7 +163,7 @@ namespace TheShop
 		}
 	}
 
-	public class Supplier2
+	public class Supplier2 : ISupplier
 	{
 		public bool ArticleInInventory(int id)
 		{
@@ -162,7 +181,7 @@ namespace TheShop
 		}
 	}
 
-	public class Supplier3
+	public class Supplier3 : ISupplier
 	{
 		public bool ArticleInInventory(int id)
 		{
@@ -185,9 +204,9 @@ namespace TheShop
 		public int Id { get; set; }
 		public string Name { get; set; } = String.Empty;
 		public int Price { get; set; }
+		public int BuyerId { get; set; }
 		public bool IsSold { get; set; }
 		public DateTime? SoldOn { get; set; }
-		public int? SoldTo { get; set; }
 	}
 
 }
