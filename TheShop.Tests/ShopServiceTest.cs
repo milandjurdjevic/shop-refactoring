@@ -10,6 +10,7 @@ public class ShopServiceTest
     private readonly Mock<ISupplier> _supplier1 = new();
     private readonly Mock<ISupplier> _supplier2 = new();
     private readonly Mock<ISupplier> _supplier3 = new();
+    private readonly Mock<TimeProvider> _time = new();
 
     private readonly ShopService _service;
 
@@ -17,7 +18,7 @@ public class ShopServiceTest
     {
         var suppliers = new List<ISupplier> { _supplier1.Object, _supplier2.Object, _supplier3.Object };
         var logger = Mock.Of<ILogger>();
-        _service = new ShopService(_repository.Object, logger, suppliers);
+        _service = new ShopService(_repository.Object, logger, suppliers, _time.Object);
     }
 
     [Fact]
@@ -38,9 +39,13 @@ public class ShopServiceTest
     {
         _supplier1.Setup(s => s.ArticleInInventory(It.IsAny<int>())).Returns(true);
         _supplier1.Setup(s => s.GetArticle(It.IsAny<int>())).Returns(new Article());
+        var expectedTime = DateTimeOffset.MinValue;
+        _time.Setup(r => r.GetUtcNow()).Returns(expectedTime);
         _service.OrderAndSellArticle(0, 0, 1);
-        _repository.Verify(r => r.Save(It.Is<Article>(a => a.BuyerId == 1 && a.IsSold && a.SoldOn.HasValue)),
-            Times.Once);
+        _repository.Verify(
+            r => r.Save(It.Is<Article>(a => a.BuyerId == 1 && a.IsSold && a.SoldOn == expectedTime.DateTime)),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -70,7 +75,7 @@ public class ShopServiceTest
     [Fact]
     public void OrderAndSellArticle_ArticleNotFound_ThrowsException() =>
         Assert.Throws<Exception>(() => _service.OrderAndSellArticle(0, 0, 0));
-    
+
     [Fact]
     public void GetById_ReturnsArticleFromRepository()
     {

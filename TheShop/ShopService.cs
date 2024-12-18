@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace TheShop
 {
-    public class ShopService(IRepository repository, ILogger logger, List<ISupplier> suppliers)
+    public class ShopService(IRepository repository, ILogger logger, List<ISupplier> suppliers, TimeProvider time)
     {
         public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
         {
@@ -16,7 +16,7 @@ namespace TheShop
         private void SellArticle(int id, int buyerId, Article article)
         {
             article.IsSold = true;
-            article.SoldOn = DateTime.Now;
+            article.SoldOn = time.GetUtcNow().DateTime;
             article.BuyerId = buyerId;
 
             try
