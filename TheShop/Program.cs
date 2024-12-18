@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TheShop
 {
@@ -6,7 +7,10 @@ namespace TheShop
 	{
 		private static void Main(string[] args)
 		{
-			var shopService = new ShopService(new InMemoryRepository(), new ConsoleLogger(), new Supplier1(), new Supplier2(), new Supplier3());
+			ISupplier supplier1 = new Supplier1();
+			ISupplier supplier2 = new Supplier2();
+			ISupplier supplier3 = new Supplier3();
+			var shopService = new ShopService(new InMemoryRepository(), new ConsoleLogger(), [supplier1, supplier2, supplier3]);
 
 			try
 			{

@@ -15,13 +15,9 @@ public class ShopServiceTest
 
     public ShopServiceTest()
     {
-        _service = new ShopService(
-            _repository.Object,
-            Mock.Of<ILogger>(),
-            _supplier1.Object,
-            _supplier2.Object,
-            _supplier3.Object
-        );
+        var suppliers = new List<ISupplier> { _supplier1.Object, _supplier2.Object, _supplier3.Object };
+        var logger = Mock.Of<ILogger>();
+        _service = new ShopService(_repository.Object, logger, suppliers);
     }
 
     [Fact]
