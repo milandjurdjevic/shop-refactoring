@@ -23,10 +23,37 @@ namespace TheShop
 
 		public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
 		{
-			#region ordering article
+			var article = OrderArticle(id, maxExpectedPrice);
+			_logger.Debug($"Trying to sell article with id={id}");
+			SellArticle(id, buyerId, article);
+		}
 
-			Article article = null;
-			Article tempArticle = null;
+		private void SellArticle(int id, int buyerId, Article article)
+		{
+			article.IsSold = true;
+			article.SoldOn = DateTime.Now;
+			article.BuyerId = buyerId;
+			
+			try
+			{
+				_repository.Save(article);
+				_logger.Info($"Article with id={id} is sold.");
+			}
+			catch (ArgumentNullException)
+			{
+				_logger.Error($"Could not save article with id={id}");
+				throw new Exception("Could not save article with id");
+			}
+			catch (Exception e)
+			{
+				_logger.Error("An error occurred while saving the article:\n" + e.Message);
+			}
+		}
+
+		private Article OrderArticle(int id, int maxExpectedPrice)
+		{
+			Article? article = null;
+			Article? tempArticle = null;
 			var articleExists = _supplier1.ArticleInInventory(id);
 			if (articleExists)
 			{
@@ -54,36 +81,13 @@ namespace TheShop
 			}
 			
 			article = tempArticle;
-			#endregion
-
-			#region selling article
 
 			if (article == null)
 			{
 				throw new Exception("Could not order article");
 			}
 
-			_logger.Debug("Trying to sell article with id=" + id);
-
-			article.IsSold = true;
-			article.SoldOn = DateTime.Now;
-			article.BuyerId = buyerId;
-			
-			try
-			{
-				_repository.Save(article);
-				_logger.Info("Article with id=" + id + " is sold.");
-			}
-			catch (ArgumentNullException ex)
-			{
-				_logger.Error("Could not save article with id=" + id);
-				throw new Exception("Could not save article with id");
-			}
-			catch (Exception)
-			{
-			}
-
-			#endregion
+			return article;
 		}
 
 		public Article GetById(int id)
@@ -92,13 +96,13 @@ namespace TheShop
 		}
 	}
 
-	//in memory implementation
 	public interface IRepository
 	{
 		Article GetById(int id);
 		void Save(Article article);
 	}
 
+	//in memory implementation
 	public class InMemoryRepository : IRepository
 	{
 		private List<Article> _articles = new List<Article>();
