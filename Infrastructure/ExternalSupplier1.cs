@@ -3,7 +3,7 @@ using Core.Articles;
 
 namespace Infrastructure;
 
-public class ExternalSupplier1 : ISupplier
+internal class ExternalSupplier1 : ISupplier
 {
     public bool ArticleInInventory(int id)
     {

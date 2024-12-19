@@ -4,7 +4,7 @@ using Core.Common;
 
 namespace Infrastructure;
 
-public class InMemoryRepository : IRepository
+internal class InMemoryRepository : IRepository
 {
     private readonly List<SoldArticle> _articles = [];
 
