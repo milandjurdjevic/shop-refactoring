@@ -21,23 +21,31 @@ public static class Result
     public static Result<TValue, TError> Tap<TValue, TError>(
         this Result<TValue, TError> result,
         Action<TValue> tap
-    ) =>
-        result.Map(val =>
+    )
+    {
+        return result.Map(val =>
         {
             tap(val);
             return val;
         });
+    }
 
     public static Result<TValue2, TError> Map<TValue1, TValue2, TError>(
         this Result<TValue1, TError> result,
         Func<TValue1, TValue2> map
-    ) => result.Match<Result<TValue2, TError>>(val => map(val), err => err);
+    )
+    {
+        return result.Match<Result<TValue2, TError>>(val => map(val), err => err);
+    }
 
 
     public static Result<TValue2, TError> Bind<TValue1, TValue2, TError>(
         this Result<TValue1, TError> result,
         Func<TValue1, Result<TValue2, TError>> map
-    ) => result.Match(map, err => err);
+    )
+    {
+        return result.Match(map, err => err);
+    }
 }
 
 public abstract class Result<TValue, TError>
@@ -52,6 +60,16 @@ public abstract class Result<TValue, TError>
     public bool IsFailure { get; }
 
     public abstract TMatch Match<TMatch>(Func<TValue, TMatch> succeed, Func<TError, TMatch> fail);
+
+    public static implicit operator Result<TValue, TError>(TValue val)
+    {
+        return new Success(val);
+    }
+
+    public static implicit operator Result<TValue, TError>(TError err)
+    {
+        return new Failure(err);
+    }
 
     [DebuggerDisplay(nameof(_value))]
     private class Success(TValue value) : Result<TValue, TError>(true)
@@ -74,7 +92,4 @@ public abstract class Result<TValue, TError>
             return fail(_error);
         }
     }
-
-    public static implicit operator Result<TValue, TError>(TValue val) => new Success(val);
-    public static implicit operator Result<TValue, TError>(TError err) => new Failure(err);
 }

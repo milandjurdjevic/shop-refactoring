@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Shop.Core;
 using Shop.Infrastructure;
 
@@ -7,9 +8,9 @@ ISupplier supplier1 = new ExternalSupplier1();
 ISupplier supplier2 = new ExternalSupplier2();
 ISupplier supplier3 = new ExternalSupplier3();
 List<ISupplier> suppliers = [supplier1, supplier2, supplier3];
-var repository = new InMemoryRepository();
-var logger = new ConsoleLogger();
-var service = new ShopService(repository, logger, suppliers, TimeProvider.System);
+InMemoryRepository? repository = new();
+ConsoleLogger? logger = new();
+ShopService? service = new(repository, logger, suppliers, TimeProvider.System);
 
 service
     .OrderAndSellArticle(1, 20, 10)

@@ -21,7 +21,7 @@ public class ConsoleLogger : ILogger
 
     private static void WriteLine(string message, ConsoleColor color)
     {
-        var originalColor = Console.ForegroundColor;
+        ConsoleColor originalColor = Console.ForegroundColor;
         Console.ForegroundColor = color;
         Console.WriteLine(message);
         Console.ForegroundColor = originalColor;

@@ -1,6 +1,9 @@
 using FluentAssertions;
+
 using JetBrains.Annotations;
+
 using Moq;
+
 using Shop.Core;
 
 namespace Shop.Tests;
@@ -9,18 +12,18 @@ namespace Shop.Tests;
 public class ShopServiceTest
 {
     private readonly Mock<IRepository> _repository = new();
+
+    private readonly ShopService _service;
     private readonly Mock<ISupplier> _supplier1 = new();
     private readonly Mock<ISupplier> _supplier2 = new();
     private readonly Mock<ISupplier> _supplier3 = new();
     private readonly Mock<TimeProvider> _time = new();
 
-    private readonly ShopService _service;
-
     public ShopServiceTest()
     {
         _repository.Setup(r => r.Save(It.IsAny<Article>())).Returns(Unit.Value);
-        var suppliers = new List<ISupplier> { _supplier1.Object, _supplier2.Object, _supplier3.Object };
-        var logger = Mock.Of<ILogger>();
+        List<ISupplier> suppliers = [_supplier1.Object, _supplier2.Object, _supplier3.Object];
+        ILogger logger = Mock.Of<ILogger>();
         _service = new ShopService(_repository.Object, logger, suppliers, _time.Object);
     }
 
@@ -41,8 +44,8 @@ public class ShopServiceTest
     public void OrderAndSellArticle_SavesArticleSoldToBuyer()
     {
         _supplier1.Setup(s => s.ArticleInInventory(It.IsAny<int>())).Returns(true);
-        _supplier1.Setup(s => s.GetArticle(It.IsAny<int>())).Returns((Article)new(0, string.Empty, 0));
-        var expectedTime = DateTimeOffset.MinValue;
+        _supplier1.Setup(s => s.GetArticle(It.IsAny<int>())).Returns((Article)new Article(0, string.Empty, 0));
+        DateTimeOffset expectedTime = DateTimeOffset.MinValue;
         _time.Setup(r => r.GetUtcNow()).Returns(expectedTime);
         _service.OrderAndSellArticle(0, 0, 1);
         _repository.Verify(
@@ -78,7 +81,7 @@ public class ShopServiceTest
     [Fact]
     public void OrderAndSellArticle_ArticleNotFound_ReturnsError()
     {
-        var tempQualifier = _service.OrderAndSellArticle(0, 0, 0);
+        Result<Unit, string> tempQualifier = _service.OrderAndSellArticle(0, 0, 0);
         tempQualifier.IsFailure.Should().BeTrue();
     }
 

@@ -4,7 +4,7 @@ namespace Shop.Infrastructure;
 
 public class InMemoryRepository : IRepository
 {
-    private List<Article> _articles = [];
+    private readonly List<Article> _articles = [];
 
     public Article? GetById(int id)
     {
