@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Shop.Core;
 using Shop.Core.Orders;
@@ -19,6 +20,7 @@ TryFind(1);
 TryFind(22);
 TryOrderAndSell(new BestPriceOrder(1, 460), new DefaultSale(10, TimeProvider.System));
 TryOrderAndSell(new BestPriceOrder(1, 460), new BudgetSale(10, 400, TimeProvider.System));
+TryFind(1);
 
 Console.ReadKey();
 
@@ -26,13 +28,15 @@ return;
 
 void TryFind(int id)
 {
-    if (service.GetById(id) is { } article)
+    int count = service.GetSoldArticles(id).Count();
+
+    if (count > 0)
     {
-        logger.Debug($"Found: {article}");
+        logger.Debug($"Found {count} sold articles by ID({id})");
     }
     else
     {
-        logger.Error($"Not found: ID({id})");
+        logger.Error($"Not found any sold articles by ID({id})");
     }
 }
 

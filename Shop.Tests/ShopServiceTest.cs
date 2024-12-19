@@ -24,7 +24,7 @@ public class ShopServiceTest
     }
 
     [Fact]
-    public void OrderAndSell_SavesArticle()
+    public void OrderAndSellArticle_SavesArticle()
     {
         Mock<IOrder> order = new();
         Article article = new(1, "", 100);
@@ -43,9 +43,9 @@ public class ShopServiceTest
     }
 
     [Fact]
-    public void GetById_ReturnsArticleFromRepository()
+    public void GetById_ReturnsArticlesFromRepository()
     {
-        _service.GetById(0);
-        _repository.Verify(r => r.GetById(It.IsAny<int>()), Times.Once);
+        _service.GetSoldArticles(0);
+        _repository.Verify(r => r.Query(It.IsAny<int>()), Times.Once);
     }
 }

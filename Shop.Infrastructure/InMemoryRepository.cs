@@ -7,9 +7,9 @@ public class InMemoryRepository : IRepository
 {
     private readonly List<SoldArticle> _articles = [];
 
-    public SoldArticle? GetById(int id)
+    public IEnumerable<SoldArticle> Query(int articleId)
     {
-        return _articles.SingleOrDefault(x => x.Details.Id == id);
+        return _articles.Where(x => x.Details.Id == articleId);
     }
 
     public Result<Unit, string> Save(SoldArticle article)

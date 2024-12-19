@@ -6,9 +6,9 @@ namespace Shop.Core;
 
 public class ShopService(IRepository repository, ILogger logger, List<ISupplier> suppliers)
 {
-    public SoldArticle? GetById(int id)
+    public IEnumerable<SoldArticle> GetSoldArticles(int id)
     {
-        return repository.GetById(id);
+        return repository.Query(id);
     }
 
     public Result<Unit, string> OrderAndSellArticle(IOrder order, ISale sale)

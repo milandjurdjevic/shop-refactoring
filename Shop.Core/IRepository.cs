@@ -4,6 +4,6 @@ namespace Shop.Core;
 
 public interface IRepository
 {
-    SoldArticle? GetById(int id);
+    IEnumerable<SoldArticle> Query(int articleId);
     Result<Unit, string> Save(SoldArticle article);
 }
