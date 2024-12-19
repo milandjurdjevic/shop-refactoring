@@ -76,19 +76,19 @@ classDiagram
 
     class IOrder {
         <<interface>>
-        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers);
+        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers)
     }
 
     class DefaultOrder {
         - int articleId
         - int maxPrice
-        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers);
+        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers)
     }
 
     class BestPriceOrder {
         - int id
         - int threshold
-        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers);
+        +Result~Article, string~ OrderArticle(IEnumerable~ISupplier~ suppliers)
     }
     
     Shop --> IRepository
