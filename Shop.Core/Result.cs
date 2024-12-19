@@ -1,7 +1,6 @@
-using System;
 using System.Diagnostics;
 
-namespace TheShop;
+namespace Shop.Core;
 
 public static class Result
 {

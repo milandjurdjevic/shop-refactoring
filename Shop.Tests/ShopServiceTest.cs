@@ -1,8 +1,9 @@
 using FluentAssertions;
 using JetBrains.Annotations;
 using Moq;
+using Shop.Core;
 
-namespace TheShop.Tests;
+namespace Shop.Tests;
 
 [TestSubject(typeof(ShopService))]
 public class ShopServiceTest
