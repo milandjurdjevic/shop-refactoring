@@ -12,35 +12,32 @@ namespace Shop.Tests;
 public class ShopServiceTest
 {
     private readonly Mock<IRepository> _repository = new();
-
     private readonly ShopService _service;
-    private readonly Mock<ISupplier> _supplier1 = new();
-    private readonly Mock<ISupplier> _supplier2 = new();
-    private readonly Mock<ISupplier> _supplier3 = new();
-    private readonly Mock<TimeProvider> _time = new();
 
     public ShopServiceTest()
     {
-        _repository.Setup(r => r.Save(It.IsAny<Article>())).Returns(Unit.Value);
-        List<ISupplier> suppliers = [_supplier1.Object, _supplier2.Object, _supplier3.Object];
-        ILogger logger = Mock.Of<ILogger>();
-        _service = new ShopService(_repository.Object, logger, suppliers, _time.Object);
+        _repository.Setup(r => r.Save(It.IsAny<SoldArticle>())).Returns(Unit.Value);
+        _service = new ShopService(_repository.Object, Mock.Of<ILogger>(), []);
     }
 
     [Fact]
-    public void OrderAndSellArticle_SavesArticleSoldToBuyer()
+    public void OrderAndSell_SavesArticle()
     {
-        _supplier1.Setup(s => s.ArticleInInventory(It.IsAny<int>())).Returns(true);
-        _supplier1.Setup(s => s.GetArticle(It.IsAny<int>())).Returns(new Article(0, string.Empty, 0));
-        DateTimeOffset expectedTime = DateTimeOffset.MinValue;
-        _time.Setup(r => r.GetUtcNow()).Returns(expectedTime);
-        _service.OrderAndSellArticle(new DefaultOrder(1, 0), 1);
-        _repository.Verify(
-            r => r.Save(It.Is<Article>(a => a.BuyerId == 1 && a.IsSold && a.SoldOn == expectedTime.DateTime)),
-            Times.Once
-        );
+        Mock<IOrder> order = new();
+        Article article = new(1, "", 100);
+        order
+            .Setup(o => o.OrderArticle(It.IsAny<IEnumerable<ISupplier>>()))
+            .Returns(article);
+
+        Mock<ISale> sale = new();
+        SoldArticle soldArticle = new(article, DateTimeOffset.UtcNow, 1);
+        sale.Setup(s => s.SellArticle(It.IsAny<Article>()))
+            .Returns(soldArticle);
+
+
+        _service.OrderAndSellArticle(order.Object, sale.Object).IsSuccess.Should().BeTrue();
+        _repository.Verify(r => r.Save(It.Is<SoldArticle>(a => soldArticle == a)), Times.Once);
     }
-    
 
     [Fact]
     public void GetById_ReturnsArticleFromRepository()

@@ -10,10 +10,10 @@ ISupplier supplier3 = new ExternalSupplier3();
 List<ISupplier> suppliers = [supplier1, supplier2, supplier3];
 InMemoryRepository repository = new();
 ConsoleLogger logger = new();
-ShopService service = new(repository, logger, suppliers, TimeProvider.System);
+ShopService service = new(repository, logger, suppliers);
 
 service
-    .OrderAndSellArticle(new DefaultOrder(1, 20), 10)
+    .OrderAndSellArticle(new DefaultOrder(1, 20), new DefaultSale(10, TimeProvider.System))
     .Switch(_ => logger.Info("Article is ordered and sold"), err => logger.Error(err));
 
 TryFindAndPrint(1);

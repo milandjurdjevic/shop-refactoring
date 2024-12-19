@@ -2,6 +2,6 @@ namespace Shop.Core;
 
 public interface IRepository
 {
-    Article? GetById(int id);
-    Result<Unit, string> Save(Article article);
+    SoldArticle? GetById(int id);
+    Result<Unit, string> Save(SoldArticle article);
 }

@@ -4,14 +4,14 @@ namespace Shop.Infrastructure;
 
 public class InMemoryRepository : IRepository
 {
-    private readonly List<Article> _articles = [];
+    private readonly List<SoldArticle> _articles = [];
 
-    public Article? GetById(int id)
+    public SoldArticle? GetById(int id)
     {
-        return _articles.SingleOrDefault(x => x.Id == id);
+        return _articles.SingleOrDefault(x => x.Details.Id == id);
     }
 
-    public Result<Unit, string> Save(Article article)
+    public Result<Unit, string> Save(SoldArticle article)
     {
         _articles.Add(article);
         return Unit.Value;
