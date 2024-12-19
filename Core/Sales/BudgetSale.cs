@@ -1,4 +1,5 @@
 using Core.Articles;
+using Core.Common;
 
 namespace Core.Sales;
 

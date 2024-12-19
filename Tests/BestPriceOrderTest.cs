@@ -1,5 +1,6 @@
 using Core;
 using Core.Articles;
+using Core.Common;
 using Core.Orders;
 
 using FluentAssertions;

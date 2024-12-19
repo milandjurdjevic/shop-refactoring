@@ -6,6 +6,7 @@ using Moq;
 
 using Core;
 using Core.Articles;
+using Core.Common;
 using Core.Orders;
 
 namespace Tests;
