@@ -14,18 +14,17 @@ InMemoryRepository repository = new();
 ConsoleLogger logger = new();
 ShopService service = new(repository, logger, suppliers);
 
-service
-    .OrderAndSellArticle(new DefaultOrder(1, 20), new DefaultSale(10, TimeProvider.System))
-    .Switch(_ => logger.Info("Article is ordered and sold"), err => logger.Error(err));
-
-TryFindAndPrint(1);
-TryFindAndPrint(22);
+TryOrderAndSell(new DefaultOrder(1, 20), new DefaultSale(10, TimeProvider.System));
+TryFind(1);
+TryFind(22);
+TryOrderAndSell(new BestPriceOrder(1, 460), new DefaultSale(10, TimeProvider.System));
+TryOrderAndSell(new BestPriceOrder(1, 460), new BudgetSale(10, 400, TimeProvider.System));
 
 Console.ReadKey();
 
 return;
 
-void TryFindAndPrint(int id)
+void TryFind(int id)
 {
     if (service.GetById(id) is { } article)
     {
@@ -35,4 +34,11 @@ void TryFindAndPrint(int id)
     {
         logger.Error($"Not found: ID({id})");
     }
+}
+
+void TryOrderAndSell(IOrder order, ISale sale)
+{
+    service
+        .OrderAndSellArticle(order, sale)
+        .Switch(_ => logger.Info("Article is ordered and sold"), err => logger.Error(err));
 }
