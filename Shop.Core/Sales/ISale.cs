@@ -1,4 +1,6 @@
-namespace Shop.Core;
+using Shop.Core.Articles;
+
+namespace Shop.Core.Sales;
 
 public interface ISale
 {

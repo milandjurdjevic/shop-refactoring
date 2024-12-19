@@ -1,4 +1,5 @@
 using Shop.Core;
+using Shop.Core.Articles;
 
 namespace Shop.Infrastructure;
 

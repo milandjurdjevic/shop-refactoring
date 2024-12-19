@@ -1,4 +1,8 @@
-﻿namespace Shop.Core;
+﻿using Shop.Core.Articles;
+using Shop.Core.Orders;
+using Shop.Core.Sales;
+
+namespace Shop.Core;
 
 public class ShopService(IRepository repository, ILogger logger, List<ISupplier> suppliers)
 {

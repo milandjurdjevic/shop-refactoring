@@ -1,4 +1,6 @@
-namespace Shop.Core;
+using Shop.Core.Articles;
+
+namespace Shop.Core.Orders;
 
 // Original ordering implementation.
 public class DefaultOrder(int articleId, int maxPrice) : IOrder

@@ -5,6 +5,9 @@ using JetBrains.Annotations;
 using Moq;
 
 using Shop.Core;
+using Shop.Core.Articles;
+using Shop.Core.Orders;
+using Shop.Core.Sales;
 
 namespace Shop.Tests;
 

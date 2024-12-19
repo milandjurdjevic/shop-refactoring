@@ -1,3 +1,5 @@
+using Shop.Core.Articles;
+
 namespace Shop.Core;
 
 public interface ISupplier

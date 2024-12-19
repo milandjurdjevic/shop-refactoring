@@ -1,5 +1,3 @@
-namespace Shop.Core;
-
-public record Article(int Id, string Name, int Price);
+namespace Shop.Core.Articles;
 
 public record SoldArticle(Article Details, DateTimeOffset Timestamp, int BuyerId);

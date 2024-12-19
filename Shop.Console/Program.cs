@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using Shop.Core;
+using Shop.Core.Orders;
+using Shop.Core.Sales;
 using Shop.Infrastructure;
 
 ISupplier supplier1 = new ExternalSupplier1();
