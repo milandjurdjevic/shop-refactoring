@@ -4,86 +4,73 @@ using System.Linq;
 
 namespace TheShop
 {
+    public struct Unit
+    {
+        public static readonly Unit Value = new();
+    }
+
     public class ShopService(IRepository repository, ILogger logger, List<ISupplier> suppliers, TimeProvider time)
     {
-        public void OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId)
-        {
-            var article = OrderArticle(id, maxExpectedPrice);
-            logger.Debug($"Trying to sell article with id={id}");
-            SellArticle(id, buyerId, article);
-        }
+        public Article? GetById(int id) => repository.GetById(id);
 
-        private void SellArticle(int id, int buyerId, Article article)
-        {
-            article.IsSold = true;
-            article.SoldOn = time.GetUtcNow().DateTime;
-            article.BuyerId = buyerId;
+        public Result<Unit, string> OrderAndSellArticle(int id, int maxExpectedPrice, int buyerId) =>
+            OrderArticle(suppliers, id, maxExpectedPrice)
+                .Tap(val => logger.Debug($"Ordered: {val}"))
+                .Map(val => SellArticle(val, time.GetUtcNow(), buyerId))
+                .Tap(val => logger.Debug($"Sold: {val}"))
+                .Bind(repository.Save);
 
-            try
-            {
-                repository.Save(article);
-                logger.Info($"Article with id={id} is sold.");
-            }
-            catch (ArgumentNullException)
-            {
-                logger.Error($"Could not save article with id={id}");
-                throw new Exception("Could not save article with id");
-            }
-            catch (Exception e)
-            {
-                logger.Error("An error occurred while saving the article:\n" + e.Message);
-            }
-        }
+        private static Article SellArticle(Article article, DateTimeOffset timestamp, int buyerId) =>
+            article with { IsSold = true, SoldOn = timestamp.DateTime, BuyerId = buyerId };
 
-        private Article OrderArticle(int id, int maxExpectedPrice)
+        private static Result<Article, string> OrderArticle(List<ISupplier> suppliers, int articleId, int maxPrice)
         {
             Article? result = null;
-
+            // Order of suppliers is important. Here are some rules captured during refactoring:
+            // - If the first supplier does not have the article, the second supplier won't be checked.
+            // - If there are no suppliers with a price matched article, the last one will be returned.
+            // - if a supplier does not have the article in inventory, the article from the last supplier will be result.
             foreach (var supplier in suppliers)
             {
-                var articleExist = supplier.ArticleInInventory(id);
+                var articleExist = supplier.ArticleInInventory(articleId);
 
                 if (!articleExist)
                 {
                     break;
                 }
 
-                result = supplier.GetArticle(id);
+                result = supplier.GetArticle(articleId);
 
-                if (result.Price < maxExpectedPrice)
+                if (result?.Price < maxPrice)
                 {
                     break;
                 }
             }
 
-            return result ?? throw new Exception("Could not order article");
-        }
-
-        public Article GetById(int id)
-        {
-            return repository.GetById(id);
+            return result != null ? result : "Could not order article";
         }
     }
 
     public interface IRepository
     {
-        Article GetById(int id);
-        void Save(Article article);
+        Article? GetById(int id);
+        Result<Unit, string> Save(Article article);
     }
 
     //in memory implementation
     public class InMemoryRepository : IRepository
     {
-        private List<Article> _articles = new List<Article>();
+        private List<Article> _articles = [];
 
-        public Article GetById(int id)
+        public Article? GetById(int id)
         {
-            return _articles.Single(x => x.Id == id);
+            return _articles.SingleOrDefault(x => x.Id == id);
         }
 
-        public void Save(Article article)
+        public Result<Unit, string> Save(Article article)
         {
             _articles.Add(article);
+            return Unit.Value;
         }
     }
 
@@ -98,24 +85,32 @@ namespace TheShop
     {
         public void Info(string message)
         {
-            Console.WriteLine("Info: " + message);
+            WriteLine("[INFO] " + message, ConsoleColor.DarkBlue);
         }
 
         public void Error(string message)
         {
-            Console.WriteLine("Error: " + message);
+            WriteLine("[ERROR] " + message, ConsoleColor.DarkRed);
         }
 
         public void Debug(string message)
         {
-            Console.WriteLine("Debug: " + message);
+            WriteLine("[DEBUG] " + message, ConsoleColor.DarkMagenta);
+        }
+
+        private static void WriteLine(string message, ConsoleColor color)
+        {
+            var originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = originalColor;
         }
     }
 
     public interface ISupplier
     {
         bool ArticleInInventory(int id);
-        Article GetArticle(int id);
+        Article? GetArticle(int id);
     }
 
     public class Supplier1 : ISupplier
@@ -127,12 +122,7 @@ namespace TheShop
 
         public Article GetArticle(int id)
         {
-            return new Article()
-            {
-                Id = 1,
-                Name = "Article from supplier1",
-                Price = 458
-            };
+            return new Article(1, "Article from supplier1", 458);
         }
     }
 
@@ -145,12 +135,7 @@ namespace TheShop
 
         public Article GetArticle(int id)
         {
-            return new Article()
-            {
-                Id = 1,
-                Name = "Article from supplier2",
-                Price = 459
-            };
+            return new Article(1, "Article from supplier2", 459);
         }
     }
 
@@ -163,22 +148,16 @@ namespace TheShop
 
         public Article GetArticle(int id)
         {
-            return new Article()
-            {
-                Id = 1,
-                Name = "Article from supplier3",
-                Price = 460
-            };
+            return new Article(1, "Article from supplier3", 460);
         }
     }
 
-    public class Article
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = String.Empty;
-        public int Price { get; set; }
-        public int BuyerId { get; set; }
-        public bool IsSold { get; set; }
-        public DateTime? SoldOn { get; set; }
-    }
+    public record Article(
+        int Id,
+        string Name,
+        int Price,
+        int? BuyerId = null,
+        bool IsSold = false,
+        DateTime? SoldOn = null
+    );
 }
